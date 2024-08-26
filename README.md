@@ -1,4 +1,4 @@
-![Euler Programming Lanuage Logo](assets/euler_logo.png)
+![Euler Programming Lanuage Logo](assets/euler_logo.jpeg)
 
 # Euler Programming Language
 
