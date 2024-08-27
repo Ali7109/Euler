@@ -1,1 +1,5 @@
-add(6, prod(2, 8))
+main() {
+    let num = sub(2, pow(2, 0))
+    output(num)
+    return 0
+}

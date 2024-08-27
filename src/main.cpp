@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "interpreter.h"
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -23,13 +24,24 @@ int main(int argc, char *argv[])
     buffer << file.rdbuf();
     std::string code = buffer.str();
 
-    Lexer lexer(code);
-    std::vector<Token> tokens = lexer.tokenize();
+    try
+    {
+        Lexer lexer(code);
+        std::vector<Token> tokens = lexer.tokenize();
 
-    Parser parser(tokens);
-    double result = parser.parseExpression();
+        Parser parser(tokens);
+        ASTNode *ast = parser.parse();
 
-    std::cout << "Result: " << std::fixed << std::setprecision(5) << result << std::endl;
+        Interpreter interpreter;
+        interpreter.interpret(ast);
+
+        delete ast; // Clean up the AST
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }

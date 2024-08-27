@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "lexer.h"
+#include "ast.h"
 #include <vector>
 #include <string>
 
@@ -9,15 +10,18 @@ class Parser
 {
 public:
     Parser(const std::vector<Token> &tokens);
-    double parseExpression(); // Handles addition and subtraction
+    ASTNode *parse(); // Parse the entire script
 
 private:
     std::vector<Token> tokens;
     size_t pos;
 
-    double parseTerm();         // Handles multiplication and division
-    double parseFactor();       // Handles numbers, parentheses, and functions
-    double parseFunctionCall(); // Handles function calls like add, sub, etc.
+    ASTNode *parseStatement();
+    ASTNode *parseBlock();
+    ASTNode *parseExpression();
+    ASTNode *parseTerm();
+    ASTNode *parseFactor();
+    ASTNode *parseFunctionCall(const std::string &funcName);
 };
 
 #endif // PARSER_H

@@ -1,74 +1,155 @@
 #include "parser.h"
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 
-// Constructor implementation
 Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens), pos(0) {}
 
-double Parser::parseExpression()
+ASTNode *Parser::parse()
 {
-    double result = parseTerm(); // Start by parsing terms
+    std::cout << "Parsing script..." << std::endl;
+    ASTNode *root = new ASTNode(ASTNodeType::PROGRAM);
+    while (pos < tokens.size() && tokens[pos].type != TokenType::END)
+    {
+        root->children.push_back(parseStatement());
+    }
+    return root;
+}
+
+ASTNode *Parser::parseStatement()
+{
+    std::cout << "Parsing statement..." << std::endl;
+    if (tokens[pos].type == IDENTIFIER && tokens[pos].value == "main")
+    {
+        pos++;
+        if (tokens[pos++].type != LPAREN || tokens[pos++].type != RPAREN)
+        {
+            throw std::runtime_error("Expected '()' after 'main'");
+        }
+        return parseBlock();
+    }
+    else if (tokens[pos].type == IDENTIFIER && tokens[pos].value == "let")
+    {
+        pos++;
+        std::string varName = tokens[pos++].value;
+        if (tokens[pos++].type != ASSIGN)
+        {
+            throw std::runtime_error("Expected '=' after variable name");
+        }
+        ASTNode *expr = parseExpression();
+        return new ASTNode(ASTNodeType::VAR_DECL, varName, expr);
+    }
+    else if (tokens[pos].type == IDENTIFIER && tokens[pos].value == "output")
+    {
+        pos++;
+        ASTNode *expr = parseExpression();
+        return new ASTNode(ASTNodeType::OUTPUT, expr);
+    }
+    else
+    {
+        return parseExpression();
+    }
+}
+
+ASTNode *Parser::parseBlock()
+{
+    std::cout << "Parsing block..." << std::endl;
+    if (tokens[pos++].type != LBRACE)
+    {
+        throw std::runtime_error("Expected '{' at the beginning of block");
+    }
+
+    ASTNode *block = new ASTNode(ASTNodeType::PROGRAM);
+    while (tokens[pos].type != RBRACE)
+    {
+        block->children.push_back(parseStatement());
+    }
+
+    if (tokens[pos++].type != RBRACE)
+    {
+        throw std::runtime_error("Expected '}' at the end of block");
+    }
+
+    return block;
+}
+
+ASTNode *Parser::parseExpression()
+{
+    std::cout << "Parsing expression..." << std::endl;
+    ASTNode *node = parseTerm();
 
     while (pos < tokens.size() && (tokens[pos].type == OPERATOR && (tokens[pos].value == "+" || tokens[pos].value == "-")))
     {
         std::string op = tokens[pos++].value;
-
-        double nextTerm = parseTerm(); // Parse the next term
+        ASTNode *nextTerm = parseTerm();
 
         if (op == "+")
-            result += nextTerm;
+            node = new ASTNode(ASTNodeType::ADD, node);
         else if (op == "-")
-            result -= nextTerm;
+            node = new ASTNode(ASTNodeType::SUBTRACT, node);
+
+        node->children.push_back(nextTerm);
     }
 
-    return result;
+    return node;
 }
 
-double Parser::parseTerm()
+ASTNode *Parser::parseTerm()
 {
-    double result = parseFactor(); // Start by parsing factors
+    std::cout << "Parsing term..." << std::endl;
+    ASTNode *node = parseFactor();
 
     while (pos < tokens.size() && (tokens[pos].type == OPERATOR && (tokens[pos].value == "*" || tokens[pos].value == "/")))
     {
         std::string op = tokens[pos++].value;
-
-        double nextFactor = parseFactor(); // Parse the next factor
+        ASTNode *nextFactor = parseFactor();
 
         if (op == "*")
-            result *= nextFactor;
+            node = new ASTNode(ASTNodeType::MULTIPLY, node);
         else if (op == "/")
         {
-            if (nextFactor == 0.0)
+            if (nextFactor == nullptr)
             {
                 throw std::runtime_error("Division by zero is not admissible");
             }
-            result /= nextFactor;
+            node = new ASTNode(ASTNodeType::DIVIDE, node);
         }
+
+        node->children.push_back(nextFactor);
     }
 
-    return result;
+    return node;
 }
 
-double Parser::parseFactor()
+ASTNode *Parser::parseFactor()
 {
+    std::cout << "Parsing factor..." << std::endl;
     if (tokens[pos].type == NUMBER)
     {
-        return std::stod(tokens[pos++].value); // Convert to double
+        return new ASTNode(ASTNodeType::NUMBER, tokens[pos++].value);
     }
     else if (tokens[pos].type == IDENTIFIER)
     {
-        return parseFunctionCall();
+        std::string identifier = tokens[pos++].value;
+        if (tokens[pos].type == LPAREN)
+        {
+            return parseFunctionCall(identifier);
+        }
+        else
+        {
+            return new ASTNode(ASTNodeType::IDENTIFIER, identifier);
+        }
     }
     else if (tokens[pos].type == LPAREN)
     {
         pos++;
-        double result = parseExpression(); // Parse the expression inside parentheses
+        ASTNode *node = parseExpression();
         if (tokens[pos].type != RPAREN)
         {
             throw std::runtime_error("Expected ')'");
         }
         pos++;
-        return result;
+        return node;
     }
     else
     {
@@ -76,41 +157,33 @@ double Parser::parseFactor()
     }
 }
 
-double Parser::parseFunctionCall()
+ASTNode *Parser::parseFunctionCall(const std::string &funcName)
 {
-    std::string funcName = tokens[pos++].value;
-    if (tokens[pos].type != LPAREN)
+    std::cout << "Parsing function call..." << std::endl;
+    if (tokens[pos++].type != LPAREN)
     {
         throw std::runtime_error("Expected '(' after function name");
     }
-    pos++;
 
-    double arg1 = parseExpression();
+    ASTNode *arg1 = parseExpression();
+    ASTNode *arg2 = nullptr;
     if (tokens[pos].type == COMMA)
     {
         pos++;
-        double arg2 = parseExpression();
-        if (tokens[pos].type != RPAREN)
-        {
-            throw std::runtime_error("Expected ')'");
-        }
-        pos++;
-        if (funcName == "add")
-            return arg1 + arg2;
-        if (funcName == "sub")
-            return arg1 - arg2;
-        if (funcName == "prod")
-            return arg1 * arg2;
-        if (funcName == "div")
-        {
-            if (arg2 == 0.0)
-            {
-                throw std::runtime_error("Division by zero is not admissible");
-            }
-            return arg1 / arg2;
-        }
-        if (funcName == "pow")
-            return std::pow(arg1, arg2);
+        arg2 = parseExpression();
     }
-    throw std::runtime_error("Invalid function call");
+    if (tokens[pos].type != RPAREN)
+    {
+        throw std::runtime_error("Expected ')'");
+    }
+    pos++;
+
+    ASTNode *funcCall = new ASTNode(ASTNodeType::FUNCTION_CALL, funcName);
+    funcCall->children.push_back(arg1);
+    if (arg2)
+    {
+        funcCall->children.push_back(arg2);
+    }
+
+    return funcCall;
 }
