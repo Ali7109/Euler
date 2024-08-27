@@ -1,8 +1,6 @@
-#include "parser.cpp"
+#include "parser.h"
 #include <iomanip>
 #include <iostream>
-// #include "lexer.h"
-// #include "parser.h"
 
 int main()
 {

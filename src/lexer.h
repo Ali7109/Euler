@@ -27,17 +27,13 @@ struct Token
 class Lexer
 {
 public:
-    // Constructor to initialize the lexer with input string
     Lexer(const std::string &input);
-
-    // Method to tokenize the input string
     std::vector<Token> tokenize();
 
 private:
     std::string input; // The input string to be tokenized
     size_t pos;        // Current position in the input string
 
-    // Helper methods to read numbers and identifiers from the input string
     std::string readNumber();
     std::string readIdentifier();
 };
