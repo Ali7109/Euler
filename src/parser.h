@@ -1,17 +1,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "lexer.h"
 #include <vector>
 #include <string>
-
-// Include Token definition from lexer.h
-#include "lexer.h"
 
 class Parser
 {
 public:
     Parser(const std::vector<Token> &tokens);
-
     double parseExpression(); // Handles addition and subtraction
 
 private:

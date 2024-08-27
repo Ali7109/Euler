@@ -1,23 +1,9 @@
-#include "lexer.cpp"
+#include "parser.h"
 #include <stdexcept>
-#include <iostream>
 #include <cmath>
 
-class Parser
-{
-public:
-    Parser(const std::vector<Token> &tokens) : tokens(tokens), pos(0) {}
-
-    double parseExpression(); // Handles addition and subtraction
-
-private:
-    std::vector<Token> tokens;
-    size_t pos;
-
-    double parseTerm();         // Handles multiplication and division
-    double parseFactor();       // Handles numbers, parentheses, and functions
-    double parseFunctionCall(); // Handles function calls like add, sub, etc.
-};
+// Constructor implementation
+Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens), pos(0) {}
 
 double Parser::parseExpression()
 {
