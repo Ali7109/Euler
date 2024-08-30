@@ -20,6 +20,7 @@ void Interpreter::interpret(ASTNode *node)
     else if (node->type == ASTNodeType::OUTPUT)
     {
         double value = evaluate(node->children[0]);
+
         std::cout << value << std::endl;
     }
 }

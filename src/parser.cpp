@@ -2,12 +2,16 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens), pos(0) {}
+std::ofstream logFile("execution.log");
 
 ASTNode *Parser::parse()
 {
-    std::cout << "Parsing script..." << std::endl;
+
+    logFile << "Parsing script..." << std::endl;
     ASTNode *root = new ASTNode(ASTNodeType::PROGRAM);
     while (pos < tokens.size() && tokens[pos].type != TokenType::END)
     {
@@ -18,7 +22,7 @@ ASTNode *Parser::parse()
 
 ASTNode *Parser::parseStatement()
 {
-    std::cout << "Parsing statement..." << std::endl;
+    logFile << "Parsing statement..." << std::endl;
     if (tokens[pos].type == IDENTIFIER && tokens[pos].value == "main")
     {
         pos++;
@@ -53,7 +57,7 @@ ASTNode *Parser::parseStatement()
 
 ASTNode *Parser::parseBlock()
 {
-    std::cout << "Parsing block..." << std::endl;
+    logFile << "Parsing block..." << std::endl;
     if (tokens[pos++].type != LBRACE)
     {
         throw std::runtime_error("Expected '{' at the beginning of block");
@@ -75,7 +79,7 @@ ASTNode *Parser::parseBlock()
 
 ASTNode *Parser::parseExpression()
 {
-    std::cout << "Parsing expression..." << std::endl;
+    logFile << "Parsing expression..." << std::endl;
     ASTNode *node = parseTerm();
 
     while (pos < tokens.size() && (tokens[pos].type == OPERATOR && (tokens[pos].value == "+" || tokens[pos].value == "-")))
@@ -96,7 +100,7 @@ ASTNode *Parser::parseExpression()
 
 ASTNode *Parser::parseTerm()
 {
-    std::cout << "Parsing term..." << std::endl;
+    logFile << "Parsing term..." << std::endl;
     ASTNode *node = parseFactor();
 
     while (pos < tokens.size() && (tokens[pos].type == OPERATOR && (tokens[pos].value == "*" || tokens[pos].value == "/")))
@@ -123,7 +127,7 @@ ASTNode *Parser::parseTerm()
 
 ASTNode *Parser::parseFactor()
 {
-    std::cout << "Parsing factor..." << std::endl;
+    logFile << "Parsing factor..." << std::endl;
     if (tokens[pos].type == NUMBER)
     {
         return new ASTNode(ASTNodeType::NUMBER, tokens[pos++].value);
@@ -159,7 +163,7 @@ ASTNode *Parser::parseFactor()
 
 ASTNode *Parser::parseFunctionCall(const std::string &funcName)
 {
-    std::cout << "Parsing function call..." << std::endl;
+    logFile << "Parsing function call..." << std::endl;
     if (tokens[pos++].type != LPAREN)
     {
         throw std::runtime_error("Expected '(' after function name");

@@ -18,7 +18,6 @@ enum class ASTNodeType
     NUMBER,       // Number literal
     IDENTIFIER,   // Variable reference
     FUNCTION_CALL // Function call
-    // Add other node types as needed
 };
 
 class ASTNode

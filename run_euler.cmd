@@ -13,12 +13,10 @@ if not "%~2"=="" (
 
 :: Check if the argument has a .eulr extension
 if /i "%~x1"==".eulr" (
-    echo Valid .eulr file detected.
-    :: Perform the desired operation here
-    echo RUN
+    CALL .\build\bin\Debug\EulerLang.exe %1
+    echo :
+    echo "Check execution.log for more details..."
 ) else (
     echo Invalid file extension. Please provide a .eulr file.
     exit /b 1
 )
-
-CALL .\build\bin\Debug\EulerLang.exe %1

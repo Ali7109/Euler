@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     std::ifstream file(argv[1]);
     if (!file)
     {
-        std::cerr << "Error: Could not open file " << argv[1] << std::endl;
+        std::cerr << "Error: Could not open or find file " << argv[1] << std::endl;
         return 1;
     }
 
