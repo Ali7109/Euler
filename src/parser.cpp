@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "helperFunctions.h"
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
@@ -11,7 +12,6 @@ std::ofstream logFile("execution.log");
 ASTNode *Parser::parse()
 {
 
-    logFile << "Parsing script..." << std::endl;
     ASTNode *root = new ASTNode(ASTNodeType::PROGRAM);
     while (pos < tokens.size() && tokens[pos].type != TokenType::END)
     {
@@ -22,9 +22,14 @@ ASTNode *Parser::parse()
 
 ASTNode *Parser::parseStatement()
 {
-    logFile << "Parsing statement..." << std::endl;
+
     if (tokens[pos].type == IDENTIFIER && tokens[pos].value == "main")
     {
+
+        std::string buffer = getOutputLog("IDENTIFIER", tokens[pos].value.c_str());
+
+        logFile << buffer << std::endl;
+
         pos++;
         if (tokens[pos++].type != LPAREN || tokens[pos++].type != RPAREN)
         {

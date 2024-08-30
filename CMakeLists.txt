@@ -13,7 +13,9 @@ set(SOURCES
     src/lexer.cpp
     src/parser.cpp
     src/interpreter.cpp
+    src/helperFunctions.cpp
 )
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Add the executable
 add_executable(EulerLang ${SOURCES})
