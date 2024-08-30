@@ -1,95 +1,102 @@
 #include "lexer.h"
 #include <cctype>
+#include <stdexcept>
 
-// Constructor implementation
 Lexer::Lexer(const std::string &input) : input(input), pos(0) {}
 
-// Tokenization method implementation
 std::vector<Token> Lexer::tokenize()
 {
-
     std::vector<Token> tokens;
-
     while (pos < input.size())
     {
-        if (std::isspace(input[pos]))
+        char current = input[pos];
+        if (std::isspace(current))
         {
-            // Skip whitespace characters
             pos++;
-            continue;
         }
-        if (std::isdigit(input[pos]))
+        else if (std::isalpha(current))
         {
-            // Process numeric literals
-            tokens.push_back(Token{NUMBER, readNumber()});
-            continue;
+            tokens.push_back(Token{TokenType::IDENTIFIER, readIdentifier()});
         }
-        if (std::isalpha(input[pos]))
+        else if (std::isdigit(current))
         {
-            // Process identifiers (variable or function names)
-            tokens.push_back(Token{IDENTIFIER, readIdentifier()});
-            continue;
+            tokens.push_back(Token{TokenType::NUMBER, readNumber()});
         }
-        switch (input[pos])
+        else if (current == '=')
         {
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-            // Process operators
-            tokens.push_back(Token{OPERATOR, std::string(1, input[pos++])});
-            break;
-        case '(':
-            // Process left parenthesis
-            tokens.push_back(Token{LPAREN, "("});
+            tokens.push_back(Token{TokenType::ASSIGN, "="});
             pos++;
-            break;
-        case ')':
-            // Process right parenthesis
-            tokens.push_back(Token{RPAREN, ")"});
+        }
+        else if (current == '+')
+        {
+            tokens.push_back(Token{TokenType::OPERATOR, "+"});
             pos++;
-            break;
-        case ',':
-            // Process comma
-            tokens.push_back(Token{COMMA, ","});
+        }
+        else if (current == '-')
+        {
+            tokens.push_back(Token{TokenType::OPERATOR, "-"});
             pos++;
-            break;
-        default:
-            // Skip any unrecognized characters
+        }
+        else if (current == '*')
+        {
+            tokens.push_back(Token{TokenType::OPERATOR, "*"});
             pos++;
-            break;
+        }
+        else if (current == '/')
+        {
+            tokens.push_back(Token{TokenType::OPERATOR, "/"});
+            pos++;
+        }
+        else if (current == '(')
+        {
+            tokens.push_back(Token{TokenType::LPAREN, "("});
+            pos++;
+        }
+        else if (current == ')')
+        {
+            tokens.push_back(Token{TokenType::RPAREN, ")"});
+            pos++;
+        }
+        else if (current == ',')
+        {
+            tokens.push_back(Token{TokenType::COMMA, ","});
+            pos++;
+        }
+        else if (current == '{')
+        {
+            tokens.push_back(Token{TokenType::LBRACE, "{"});
+            pos++;
+        }
+        else if (current == '}')
+        {
+            tokens.push_back(Token{TokenType::RBRACE, "}"});
+            pos++;
+        }
+        else
+        {
+            throw std::runtime_error("Unexpected character: " + std::string(1, current));
         }
     }
-    // Add an end token to signify the end of input
-    tokens.push_back(Token{END, ""});
+    tokens.push_back(Token{TokenType::END, ""});
     return tokens;
 }
 
-// Method to read a number from the input string
 std::string Lexer::readNumber()
 {
-    size_t start = pos;
-    bool hasDecPoint = false;
-
-    while (pos < input.size() && (std::isdigit(input[pos]) || input[pos] == '.'))
+    std::string number;
+    while (pos < input.size() && std::isdigit(input[pos]))
     {
-
-        if (input[pos] == '.')
-        {
-            if (hasDecPoint)
-                break;
-            hasDecPoint = true;
-        }
-        pos++;
+        number += input[pos++];
     }
-    return input.substr(start, pos - start);
+    return number;
 }
 
-// Method to read an identifier (variable or function name) from the input string
 std::string Lexer::readIdentifier()
 {
-    size_t start = pos;
+    std::string identifier;
     while (pos < input.size() && std::isalnum(input[pos]))
-        pos++;
-    return input.substr(start, pos - start);
+    {
+        identifier += input[pos++];
+    }
+    return identifier;
 }

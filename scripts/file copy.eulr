@@ -1,0 +1,5 @@
+main() {
+    let num = sub(2, pow(2, 9))
+    output(num)
+    return 0
+}

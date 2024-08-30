@@ -1,0 +1,6 @@
+main() {
+    let num = add(10, pow(10, 9))
+    output(num)
+
+    return 0
+}

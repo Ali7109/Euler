@@ -12,7 +12,10 @@ enum TokenType
     OPERATOR,   // Operators like +, -, *, /
     LPAREN,     // Left parenthesis
     RPAREN,     // Right parenthesis
+    LBRACE,     // Left Bracket {
+    RBRACE,     // Right Bracket }
     COMMA,      // Comma
+    ASSIGN,     // Assignment operator '='
     END         // End of Input
 };
 
